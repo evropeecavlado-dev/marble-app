@@ -113,7 +113,7 @@ details[open] summary::before{content:'▼ '}
     <label>Телефон</label>
     <input id="f-phone" type="tel" placeholder="+359 88 123 4567">
     <label>Лице за контакт</label>
-    <input id="f-contact" placeholder="Иван Иванов">
+    <input id="f-contact" placeholder="Мария Иванова (дъщеря)">
     <label>Населено място</label>
     <input id="f-place" placeholder="Казанлък">
     <div class="row2">
@@ -188,9 +188,6 @@ var firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 var db = firebase.firestore();
-db.enablePersistence({synchronizeTabs:false}).catch(function(err){
-  console.log('Persistence:', err.code);
-});
 var ordersCol = db.collection('orders');
 var unsubscribe = null;
 
@@ -210,17 +207,7 @@ function save(){
 function saveToFirebase(o){
   var data=Object.assign({},o);
   if(data.photo && data.photo.length > 100) data.photo = '';
-  delete data._offline; // изчисти флага преди запис във Firebase
-  ordersCol.doc(String(o.id)).set(data)
-    .then(function(){
-      // Firebase потвърди — изчисти офлайн флага локално
-      orders = orders.map(function(x){
-        if(x.id===o.id){ delete x._offline; }
-        return x;
-      });
-      try{localStorage.setItem(KEY,JSON.stringify(orders));}catch(e){}
-    })
-    .catch(function(e){console.log('Firebase error:',e);});
+  ordersCol.doc(String(o.id)).set(data).catch(function(e){console.log('Firebase error:',e);});
 }
 function deleteFromFirebase(id){
   ordersCol.doc(String(id)).delete().catch(function(e){console.log('Firebase error:',e);});
@@ -231,26 +218,12 @@ function startSync(){
   unsubscribe = ordersCol.onSnapshot(function(snap){
     var fbOrders=[];
     snap.forEach(function(doc){ fbOrders.push(doc.data()); });
-    // Намери локални поръчки, които НЕ са потвърдени от Firebase
-    // (добавени офлайн или все още не са синхронизирани)
-    var fbIds={};
-    fbOrders.forEach(function(o){ fbIds[o.id]=true; });
-    var localOnly=orders.filter(function(o){ return o._offline && !fbIds[o.id]; });
-    // Качи офлайн поръчките в Firebase
-    localOnly.forEach(function(o){
-      saveToFirebase(o);
-    });
-    // Слей: Firebase данни + локални снимки + офлайн поръчки
     var localPhotos={};
     orders.forEach(function(o){ if(o.photo) localPhotos[o.id]=o.photo; });
-    var merged = fbOrders.map(function(o){
+    orders = fbOrders.map(function(o){
       if(localPhotos[o.id]) o.photo = localPhotos[o.id];
       return o;
     });
-    // Добави офлайн поръчките (все още не са в Firebase отговора)
-    localOnly.forEach(function(o){ merged.push(o); });
-    merged.sort(function(a,b){ return (a.id||0)-(b.id||0); });
-    orders = merged;
     try{localStorage.setItem(KEY,JSON.stringify(orders));}catch(e){}
     renderAll();
     showSyncStatus('🟢 Синхронизирано');
@@ -372,8 +345,6 @@ function saveOrder(){
   };
   if(editId){orders=orders.map(function(x){return x.id===parseInt(editId)?o:x;});}
   else{orders.push(o);}
-  // Маркирай като офлайн докато Firebase не потвърди
-  o._offline = true;
   save();
   saveToFirebase(o);
   showFlash(editId?'Поръчката е обновена! ✓':'Поръчката е записана! ✓',false);
