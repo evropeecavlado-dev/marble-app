@@ -188,6 +188,9 @@ var firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 var db = firebase.firestore();
+db.enablePersistence({synchronizeTabs:false}).catch(function(err){
+  console.log('Persistence:', err.code);
+});
 var ordersCol = db.collection('orders');
 var unsubscribe = null;
 
