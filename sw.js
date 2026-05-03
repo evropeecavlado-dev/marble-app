@@ -1,3 +1,6 @@
+// Мрежа първо — винаги зарежда най-новото от GitHub
+// Кешът служи само като резервно при проблем с мрежата
+
 var CACHE = 'mramor-v1';
 var ASSETS = [
   '/marble-app/',
@@ -40,18 +43,19 @@ self.addEventListener('fetch', function(e) {
     }));
     return;
   }
-  // Локални файлове — кеш първо, после мрежа
+  // Мрежа първо — при успех обнови кеша
+  // При грешка (офлайн) — използвай кеша
   e.respondWith(
-    caches.match(e.request).then(function(cached) {
-      return cached || fetch(e.request).then(function(resp) {
-        if (resp && resp.status === 200) {
-          var clone = resp.clone();
-          caches.open(CACHE).then(function(c) { c.put(e.request, clone); });
-        }
-        return resp;
-      });
+    fetch(e.request).then(function(resp) {
+      if (resp && resp.status === 200) {
+        var clone = resp.clone();
+        caches.open(CACHE).then(function(c) { c.put(e.request, clone); });
+      }
+      return resp;
     }).catch(function() {
-      return caches.match('/marble-app/index.html');
+      return caches.match(e.request).then(function(cached) {
+        return cached || caches.match('/marble-app/index.html');
+      });
     })
   );
 });
