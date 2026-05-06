@@ -1,7 +1,7 @@
 // Мрежа първо — винаги зарежда най-новото от GitHub
 // Кешът служи само като резервно при проблем с мрежата
 
-var CACHE = 'mramor-v1';
+var CACHE = 'mramor-v2';
 var ASSETS = [
   '/marble-app/',
   '/marble-app/index.html',
