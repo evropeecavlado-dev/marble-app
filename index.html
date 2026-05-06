@@ -66,8 +66,47 @@ details[open] summary::before{content:'▼ '}
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 </head>
 <body>
+<!-- ЕКРАН ЗА ВХОД -->
+<div id="login-screen" style="
+  position:fixed;inset:0;z-index:9999;
+  background:#111827;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:32px 24px;
+">
+  <div style="max-width:340px;width:100%;text-align:center">
+    <div style="font-size:52px;margin-bottom:12px">🪨</div>
+    <h1 style="color:#fff;font-size:28px;font-weight:900;margin:0 0 6px">Мрамор Про</h1>
+    <p style="color:#94a3b8;font-size:14px;margin:0 0 36px">Влез в профила си, за да продължиш</p>
+
+    <button id="google-btn" onclick="signInWithGoogle()" style="
+      display:flex;align-items:center;justify-content:center;gap:12px;
+      width:100%;padding:14px 20px;
+      background:#fff;color:#111827;
+      border:none;border-radius:14px;
+      font-size:16px;font-weight:700;cursor:pointer;
+      box-shadow:0 4px 20px rgba(0,0,0,0.3);
+      transition:opacity .15s;
+    ">
+      <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+      Вход с Google
+    </button>
+
+    <div id="login-error" style="
+      display:none;margin-top:16px;
+      background:#fee2e2;color:#991b1b;
+      border-radius:12px;padding:12px 14px;
+      font-size:14px;font-weight:600;
+    "></div>
+
+    <p style="color:#475569;font-size:12px;margin-top:28px;line-height:1.6">
+      Само оторизирани потребители<br>имат достъп до поръчките.
+    </p>
+  </div>
+</div>
+
 <div class="app">
 
 <header>
@@ -109,7 +148,7 @@ details[open] summary::before{content:'▼ '}
       <div><label>Дата</label><input id="f-date" type="date"></div>
     </div>
     <label>Клиент / Име</label>
-    <input id="f-client" placeholder="Иван Иванов">
+    <input id="f-client" placeholder="Мария Иванова (дъщеря)">
     <label>Телефон</label>
     <input id="f-phone" type="tel" placeholder="+359 88 123 4567">
     <label>Лице за контакт</label>
@@ -188,6 +227,7 @@ var firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 var db = firebase.firestore();
+var auth = firebase.auth();
 var ordersCol = db.collection('orders');
 var unsubscribe = null;
 
@@ -602,7 +642,44 @@ function pillCls(o){
   return o.status==='Нова'?'p-new':'p-work';
 }
 
-load();buildItems();setToday();recalc();renderAll();startSync();
+// ── Автентикация ──
+function signInWithGoogle(){
+  var btn=document.getElementById('google-btn');
+  btn.style.opacity='0.6';btn.style.pointerEvents='none';
+  btn.innerHTML='<span style="font-size:15px">⏳</span> Влизане...';
+  var provider=new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(provider).catch(function(err){
+    btn.style.opacity='1';btn.style.pointerEvents='auto';
+    btn.innerHTML='<svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg> Вход с Google';
+    var errEl=document.getElementById('login-error');
+    errEl.textContent='Грешка: '+err.message;errEl.style.display='block';
+  });
+}
+
+function signOut(){
+  if(confirm('Да излезеш ли от профила?')){
+    auth.signOut();
+  }
+}
+
+// Слушай промяната на auth state
+auth.onAuthStateChanged(function(user){
+  var loginScreen=document.getElementById('login-screen');
+  if(user){
+    // Потребителят е влязъл
+    loginScreen.style.display='none';
+    // Покажи email в хедъра
+    var syncEl=document.getElementById('sync-status');
+    if(syncEl) syncEl.innerHTML='👤 '+esc(user.displayName||user.email)+
+      ' &nbsp;<span onclick="signOut()" style="cursor:pointer;color:#ef4444;font-weight:700">[Изход]</span>';
+    // Стартирай приложението
+    load();buildItems();setToday();recalc();renderAll();startSync();
+  } else {
+    // Не е влязъл — покажи login screen
+    loginScreen.style.display='flex';
+    if(unsubscribe){unsubscribe();unsubscribe=null;}
+  }
+});
 
 if('serviceWorker' in navigator){
   // Регистрирай SW само за да изчисти стари кешове
