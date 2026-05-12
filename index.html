@@ -704,7 +704,7 @@ function renderList(){
     var notesHtml=o.notes?'<div style="margin-top:8px;padding-top:8px;border-top:1px solid #f1f5f9"><span style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px">📝 Бележки</span><div style="margin-top:4px;font-size:14px;color:#374151;white-space:pre-wrap">'+esc(o.notes)+'</div></div>':'';
     var progressHtml=o.items.length?'<span style="font-size:11px;color:#64748b;margin-left:6px">'+doneCount+'/'+o.items.length+' готово</span>':'';
     return '<div class="order-row" id="orow-'+o.id+'">'
-      +'<div class="order-row-top" onclick="toggleOrder('+o.id+')">'
+      +'<div class="order-row-top" onclick="toggleOrder('+o.id+',event)">'
         +'<div class="order-row-stripe '+sc+'"></div>'
         +'<div class="order-row-info">'
           +'<div class="order-row-name">№'+esc(o.no)+' — '+esc(o.client)+'</div>'
@@ -756,7 +756,8 @@ function toggleBreakdown(id){
   if(arr)arr.style.transform=open?'':'rotate(180deg)';
 }
 
-function toggleOrder(id){
+function toggleOrder(id, event){
+  event.stopPropagation();
   var el=document.getElementById('orow-'+id);
   if(el)el.classList.toggle('open');
 }
