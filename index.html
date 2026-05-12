@@ -128,11 +128,9 @@ details[open] summary::before{content:'▼ '}
     <button class="sec-btn" onclick="goTo('pg-dead')">⏰ Срокове</button>
     <button class="sec-btn" onclick="goTo('pg-rep')">📊 Справки</button>
   </div>
-  <div class="card" style="margin-top:12px">
-    <b style="font-size:15px">💾 Бекъп и възстановяване</b>
-    <p class="muted" style="margin:5px 0 10px">Запази или възстанови всички поръчки.</p>
-    <button class="blue" onclick="exportData()">⬇️ Свали бекъп</button>
-    <label for="f-import" style="display:block;width:100%;background:#fff;color:#111827;border:1px solid #d1d5db;border-radius:14px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;text-align:center;margin-top:8px">⬆️ Зареди бекъп</label>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">
+    <button class="blue" style="padding:10px 6px;font-size:13px;border-radius:12px;margin-top:0" onclick="exportData()">⬇️ Свали бекъп</button>
+    <label for="f-import" style="display:flex;align-items:center;justify-content:center;background:#fff;color:#111827;border:1px solid #d1d5db;border-radius:12px;padding:10px 6px;font-size:13px;font-weight:700;cursor:pointer;text-align:center;margin:0">⬆️ Зареди бекъп</label>
     <input type="file" id="f-import" accept=".json" style="display:none" onchange="importData(this)">
   </div>
 
@@ -580,6 +578,7 @@ function renderList(){
       '<details style="margin-top:8px"><summary>Разбивка по елементи</summary>'+
         o.items.map(function(it){return '<div class="row-sum"><span>'+esc(it.name)+(it.desc?'<br><small class="muted">'+esc(it.desc)+'</small>':'')+
           '</span><span>'+(it.price||0).toFixed(2)+' €</span></div>';}).join('')+
+        (o.notes?'<div style="margin-top:8px;padding-top:8px;border-top:1px solid #f1f5f9"><span style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px">📝 Бележки</span><div style="margin-top:4px;font-size:14px;color:#374151;white-space:pre-wrap">'+esc(o.notes)+'</div></div>':'')+
       '</details>'+
       '<div style="margin-top:8px"><b style="font-size:13px">Статус:</b><div class="status-row">'+btns+'</div></div>'+
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px">'+
