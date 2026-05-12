@@ -694,8 +694,8 @@ function renderList(){
       var checked=it.done?'checked':'';
       var lineStyle=it.done?'text-decoration:line-through;color:#94a3b8':'';
       return '<div class="row-sum" style="align-items:center">'
-        +'<label style="display:flex;align-items:center;gap:8px;flex:1;cursor:pointer;margin:0">'
-        +'<input type="checkbox" id="chk-'+o.id+'-'+i+'" '+checked+' onchange="toggleItemDone('+o.id+','+i+')" style="width:18px;height:18px;border-radius:5px;flex-shrink:0;cursor:pointer;accent-color:#16a34a;margin:0;padding:0">'
+        +'<label style="display:flex;align-items:center;gap:8px;flex:1;cursor:pointer;margin:0" onclick="event.stopPropagation()">'
+        +'<input type="checkbox" id="chk-'+o.id+'-'+i+'" '+checked+' onchange="toggleItemDone('+o.id+','+i+')" onclick="event.stopPropagation()" style="width:18px;height:18px;border-radius:5px;flex-shrink:0;cursor:pointer;accent-color:#16a34a;margin:0;padding:0">'
         +'<span id="lbl-'+o.id+'-'+i+'" style="'+lineStyle+'">'+esc(it.name)+(it.desc?'<br><small class="muted">'+esc(it.desc)+'</small>':'')+'</span>'
         +'</label>'
         +'<span style="flex-shrink:0;margin-left:8px;'+(it.done?'color:#94a3b8':'')+'">'+( it.price||0).toFixed(2)+' €</span>'
