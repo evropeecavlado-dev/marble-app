@@ -21,6 +21,13 @@ header p{margin:5px 0 0;color:#94a3b8;font-size:13px}
 .hidden{display:none!important}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .card{background:#fff;border-radius:18px;padding:16px;margin-bottom:12px;box-shadow:0 1px 8px #0001;border:1px solid #e2e8f0}
+.card-stripe{background:#fff;border-radius:18px;margin-bottom:12px;box-shadow:0 1px 8px #0001;border:1px solid #e2e8f0;display:flex;overflow:hidden}
+.card-stripe .stripe{width:6px;flex-shrink:0}
+.stripe-new{background:#3b82f6}
+.stripe-work{background:#f59e0b}
+.stripe-done{background:#22c55e}
+.stripe-late{background:#ef4444}
+.card-stripe-body{padding:16px;flex:1;min-width:0}
 .stat{background:#111827;color:#fff;border-radius:18px;padding:16px 18px;margin-bottom:14px}
 .stat .num{font-size:34px;font-weight:900;margin:4px 0 2px}
 .stat .sub{color:#94a3b8;font-size:13px}
@@ -561,7 +568,10 @@ function renderList(){
       return '<button class="'+cls+' sm" onclick="changeStatus('+o.id+',\''+s+'\')">'+s+'</button>';
     }).join('');
     var photoHtml=o.photo?'<div style="margin-top:10px"><img src="'+o.photo+'" style="width:100%;border-radius:12px;max-height:180px;object-fit:cover"></div>':'';
-    return '<div class="card">'+
+    var stripecls=o.status==='Платена'||o.status==='Приключена'?'stripe-done':
+      (o.dead&&(function(){var n=new Date();n.setHours(0,0,0,0);var d=new Date(o.dead);d.setHours(0,0,0,0);return d<n;})())?'stripe-late':
+      o.status==='В работа'?'stripe-work':'stripe-new';
+    return '<div class="card-stripe"><div class="stripe '+stripecls+'"></div><div class="card-stripe-body">'+
       '<div class="order-title">№'+esc(o.no)+' — '+esc(o.client)+'</div>'+
       '<div class="muted">'+esc(o.place||'-')+' · срок: '+fmtDate(o.dead)+'</div>'+
       (o.contact?'<div style="font-size:13px;color:#475569;margin-top:4px">👤 Контакт: <b>'+esc(o.contact)+'</b></div>':'')+
@@ -588,7 +598,7 @@ function renderList(){
       (o.dead?'<button class="blue" style="margin-top:8px" onclick="addToGCal('+o.id+')">📅 Добави в Google Calendar</button>':'')+
       (o.contact?'<div style="font-size:13px;color:#475569;margin-top:4px">👤 Контакт: <b>'+esc(o.contact)+'</b></div>':'')+
       (o.phone?'<a href="tel:'+esc(o.phone)+'" style="display:block;text-align:center;background:#15803d;color:#fff;border-radius:14px;padding:13px;font-weight:700;font-size:15px;text-decoration:none;margin-top:8px">📞 Набери '+esc(o.phone)+'</a>':'')+
-    '</div>';
+    '</div></div>';
   }).join('');
 }
 
