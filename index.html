@@ -666,6 +666,15 @@ function renderList(){
   var q=(document.getElementById('srch').value||'').toLowerCase();
   var wrap=document.getElementById('list-wrap');
   var now=new Date();now.setHours(0,0,0,0);
+  // Запомни кои поръчки и разбивки са отворени преди рендиране
+  var openOrders={};
+  var openBreakdowns={};
+  document.querySelectorAll('.order-row.open').forEach(function(el){
+    var id=el.id.replace('orow-','');openOrders[id]=true;
+  });
+  document.querySelectorAll('[id^="bd-"]').forEach(function(el){
+    if(el.style.display==='block'){var id=el.id.replace('bd-','');openBreakdowns[id]=true;}
+  });
   function isLate(o){return o.status!=='Платена'&&o.status!=='Приключена'&&o.dead&&(function(){var d=new Date(o.dead);d.setHours(0,0,0,0);return d<now;})();}
   var f=orders.filter(function(o){
     var matchQ=String(o.no).toLowerCase().includes(q)||o.client.toLowerCase().includes(q)||(o.place||'').toLowerCase().includes(q)||(o.phone||'').includes(q);
@@ -678,7 +687,8 @@ function renderList(){
     if(!isLate(a)&&isLate(b))return 1;
     return b.id-a.id;
   });
-  wrap.innerHTML=sorted.map(function(o){
+  // Рендирай и след това възстанови отвореното състояние
+  var html=sorted.map(function(o){
     var allStatuses=['Нова','В работа','Приключена','Платена'];
     var btns=allStatuses.filter(function(s){return s!==o.status;}).map(function(s){
       var cls=s==='Нова'?'sec-btn':s==='В работа'?'amber':s==='Приключена'?'blue':'green';
@@ -745,6 +755,17 @@ function renderList(){
       +'</div>'
     +'</div>';
   }).join('');
+  wrap.innerHTML=html;
+  // Възстанови отвореното меню и разбивките
+  Object.keys(openOrders).forEach(function(id){
+    var el=document.getElementById('orow-'+id);if(el)el.classList.add('open');
+  });
+  Object.keys(openBreakdowns).forEach(function(id){
+    var el=document.getElementById('bd-'+id);
+    var arr=document.getElementById('bd-arr-'+id);
+    if(el){el.style.display='block';}
+    if(arr){arr.style.transform='rotate(180deg)';}
+  });
 }
 
 function toggleBreakdown(id){
