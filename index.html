@@ -693,7 +693,7 @@ function renderList(){
       var cls=s==='Нова'?'sec-btn':s==='В работа'?'amber':s==='Приключена'?'blue':'green';
       return '<button class="'+cls+' sm" onclick="changeStatus('+o.id+',\''+s+'\')">'+s+'</button>';
     }).join('');
-    var isPaid=o.status==='Платена'||o.status==='Приключена';
+    var isPaid=o.status==='Платена';
     var late=isLate(o);
     var sc=isPaid?'stripe-done':late?'stripe-late':o.status==='В работа'?'stripe-work':'stripe-new';
     var subExtra=late?'<span style="color:#dc2626;font-weight:700"> · ⚠️ просрочена</span>':'';
