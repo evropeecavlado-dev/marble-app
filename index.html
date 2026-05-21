@@ -23,9 +23,10 @@ header p{margin:5px 0 0;color:#94a3b8;font-size:13px}
 .card{background:#fff;border-radius:18px;padding:16px;margin-bottom:12px;box-shadow:0 1px 8px #0001;border:1px solid #e2e8f0}
 .card-stripe{background:#fff;border-radius:18px;margin-bottom:12px;box-shadow:0 1px 8px #0001;border:1px solid #e2e8f0;display:flex;overflow:hidden}
 .card-stripe .stripe{width:6px;flex-shrink:0}
-.stripe-new{background:#3b82f6}
+.stripe-new{background:#94a3b8}
 .stripe-work{background:#f59e0b}
 .stripe-done{background:#22c55e}
+.stripe-finish{background:#3b82f6}
 .stripe-late{background:#ef4444}
 .card-stripe-body{padding:16px;flex:1;min-width:0}
 .stat{background:#111827;color:#fff;border-radius:18px;padding:16px 18px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center}
@@ -84,9 +85,10 @@ input[readonly]{background:#f1f5f9;color:#374151}
 .flash.ok{background:#dcfce7;color:#15803d}
 .flash.err{background:#fee2e2;color:#991b1b}
 .pill{display:inline-block;padding:4px 11px;border-radius:999px;font-size:12px;font-weight:700;margin:5px 0}
-.p-new{background:#dbeafe;color:#1d4ed8}
+.p-new{background:#e2e8f0;color:#475569}
 .p-work{background:#ffedd5;color:#c2410c}
 .p-done{background:#dcfce7;color:#15803d}
+.p-finish{background:#dbeafe;color:#1d4ed8}
 .p-late{background:#fee2e2;color:#b91c1c}
 .row-sum{display:flex;justify-content:space-between;padding:5px 0;border-top:1px solid #f1f5f9;font-size:14px}
 .muted{color:#64748b;font-size:13px}
@@ -621,7 +623,7 @@ function renderHome(){
   var wrap=document.getElementById('home-recent');
   if(!recent.length){wrap.innerHTML='<div class="muted" style="font-size:13px;text-align:center;padding:12px">Няма поръчки още.</div>';return;}
   wrap.innerHTML=recent.map(function(o){
-    var sc=o.status==='Платена'||o.status==='Приключена'?'stripe-done':
+    var sc=o.status==='Платена'?'stripe-done':o.status==='Приключена'?'stripe-finish':
       (o.dead&&(function(){var d=new Date(o.dead);d.setHours(0,0,0,0);return d<now;})())?'stripe-late':
       o.status==='В работа'?'stripe-work':'stripe-new';
     var isPaid=o.status==='Платена';
@@ -695,7 +697,7 @@ function renderList(){
     }).join('');
     var isPaid=o.status==='Платена';
     var late=isLate(o);
-    var sc=isPaid?'stripe-done':late?'stripe-late':o.status==='В работа'?'stripe-work':'stripe-new';
+    var sc=isPaid?'stripe-done':o.status==='Приключена'?'stripe-finish':late?'stripe-late':o.status==='В работа'?'stripe-work':'stripe-new';
     var subExtra=late?'<span style="color:#dc2626;font-weight:700"> · ⚠️ просрочена</span>':'';
     var photoHtml=o.photo?'<div style="margin-top:10px"><img src="'+o.photo+'" style="width:100%;border-radius:12px;max-height:180px;object-fit:cover"></div>':'';
     var doneCount=o.items.filter(function(it){return it.done;}).length;
@@ -870,7 +872,8 @@ function renderReports(){
 function esc(t){return String(t||'').replace(/[&<>"']/g,function(m){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#039;"}[m];});}
 function fmtDate(d){if(!d)return'-';var dt=new Date(d);return isNaN(dt)?'-':dt.toLocaleDateString('bg-BG');}
 function pillCls(o){
-  if(o.status==='Приключена'||o.status==='Платена')return 'p-done';
+  if(o.status==='Платена')return 'p-done';
+  if(o.status==='Приключена')return 'p-finish';
   if(o.dead){var n=new Date();n.setHours(0,0,0,0);var d=new Date(o.dead);d.setHours(0,0,0,0);if(d<n)return 'p-late';}
   return o.status==='Нова'?'p-new':'p-work';
 }
